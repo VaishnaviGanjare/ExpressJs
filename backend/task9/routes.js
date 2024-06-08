@@ -27,9 +27,10 @@ const requestHandler = (req,res)=>{
         console.log(chunk);
         body.push(chunk);
     });
-    req.on('end',()=>{//we can also return req.on it will give same result
+     req.on('end',()=>{//we can also return req.on it will give same result
         const parsedBody=Buffer.concat(body).toString();
         const message=parsedBody.split('=')[1];
+        console.log(message);
         
         fs.writeFile('message.txt', message, (err)=>{
             if(err)
