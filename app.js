@@ -1,6 +1,8 @@
 
 const express=require('express');
 const app=express();
+const shopRoutes=require('./routes/shop');
+const adminRoutes=require('./routes/admin');//we can also add .js after admin or it will be add by default.
 const bodyParser = require('body-parser');
 
 //console.log('starting application');
@@ -8,17 +10,13 @@ app.get('/favicon.ico', (req, res) => res.status(204));
 
 app.use(bodyParser.urlencoded({extended: false}));
 
-app.use('/add-product',(req,res,next)=>{
-    res.send('<form action="/product" method="POST">product: <input type="text" name="title"><br>size:  <input type="number" name="size"><br><button type="submit">add product</button></form>');
-});
+app.use('/admin',adminRoutes);//sending object , it should be declare here as order matters if declare it after next niddleware then it will not get execute.
 
-app.post('/product',(req,res,next)=>{
-    console.log(req.body);
-    res.redirect('/');
-});
+app.use('/shop',shopRoutes);
 
+//for giving 404 error when wrong url enter
 app.use('/',(req,res,next)=>{
-    res.send('<h>Hello from NodeJs!</h>');
+    res.status(404).send('<h>Page not found</h>');
 });
 
 app.listen(4000);
