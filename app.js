@@ -7,6 +7,8 @@ const contactusRoutes=require('./routes/contactus');
 const bodyParser = require('body-parser');
 const path=require('path');
 
+const errorController=require('./controllers/error.js');
+
 //console.log('starting application');
 app.get('/favicon.ico', (req, res) => res.status(204));
 
@@ -20,7 +22,5 @@ app.use('/shop',shopRoutes);
 app.use('/contactus',contactusRoutes);
 
 //for giving 404 error when wrong url enter
-app.use('/',(req,res,next)=>{
-    res.status(404).sendFile(path.join(__dirname,'views','404.html'));//here no need to write ../ as we already in routes folder.
-});
+app.use('/',errorController.get404);
 app.listen(4000);
