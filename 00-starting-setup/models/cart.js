@@ -44,6 +44,10 @@ module.exports = class Cart {
 
       const updatedCart={...JSON.parse(fileContent)};
       const product=updatedCart.products.find(prod=>prod.id===id);
+      //if product we want to delete is not present in cart then we simply return
+      if(!product){
+        return;
+      }
       const productQty=product.qty;
       updatedCart.products=updatedCart.products.filter(prod=>prod.id !== id)
       
