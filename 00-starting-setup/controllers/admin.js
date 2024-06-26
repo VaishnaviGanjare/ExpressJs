@@ -1,4 +1,5 @@
 const Product = require('../models/product'); 
+const sequelize = require('../util/database');
 
 exports.getAddProduct = (req, res, next) => {
   res.render('admin/edit-product', {
@@ -13,14 +14,18 @@ exports.postAddProduct = (req, res, next) => {
   const imageUrl = req.body.imageUrl;
   const price = req.body.price;
   const description = req.body.description;
-  const product = new Product(title, imageUrl, price, description);
-  product.save()
-  .then(()=>{
-    res.redirect('/');
+  Product.create({
+    title: title,
+    imageUrl: imageUrl,
+    price: price,
+    description: description
+  }).then((result)=>{
+    console.log('Created product');
+    res.redirect('/admin/products');
   })
   .catch((err)=>{
     console.log(err);
-  });
+  })
 };
 
 exports.getEditProduct = (req, res, next) => {
@@ -31,13 +36,13 @@ exports.getEditProduct = (req, res, next) => {
   console.log(req.params);
   const prodId=req.params.productId;
   console.log(prodId);
-  Product.findById()
-  .then(([product])=>{
+  Product.findByPk(prodId)
+  .then((product)=>{
     res.render('admin/edit-product', {
       pageTitle: 'Edit Product',
       path: '/admin/edit-product',
       editing: editMode,
-      product: product[0]
+      product: product
     });
   })
   .catch((err)=>{
@@ -52,28 +57,29 @@ exports.postEditProduct = (req,res,next)=>{
   const updatedprice=req.body.price;
   const updateddescription=req.body.description;
 
-  const updatedProduct=new Product(
-    prodId, 
-    updatedtitle, 
-    updatedimageUrl, 
-    updatedprice, 
-    updateddescription
-  );
-  updatedProduct.edit(prodId)
-  .then(([product])=>{
+  Product.findByPk(prodId)
+  .then((product)=>{
+    product.title=updatedtitle,
+    product.imageUrl=updatedimageUrl,
+    product.price=updatedprice,
+    product.description=updateddescription
+    return product.save()//we can also use .then and .catch after save but it will look complex hence we 
+    //create new then ouside and single catch will hold error of both then blocks.
+  })
+  .then((result)=>{
+    console.log('UPDATED PRODUCT')
     res.redirect('/admin/products');
   })
   .catch((err)=>{
     console.log(err);
   })
-  
 }
 
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll()
-  .then(([product])=>{
+  Product.findAll()
+  .then((products)=>{
     res.render('admin/products', {
-      prods: product,
+      prods: products,
       pageTitle: 'Admin Products',
       path: '/admin/products'
     });
@@ -86,8 +92,12 @@ exports.getProducts = (req, res, next) => {
 exports.postDeleteProduct = (req, res, next)=>{
   const prodId=req.body.productId;
   console.log(prodId);
-  Product.deleteById(prodId)
-  .then(([product])=>{
+  Product.findByPk(prodId)
+  .then((product)=>{
+    return product.destroy();
+  })
+  .then((result)=>{
+    console.log('DELETED PRODUCT');
     res.redirect('/admin/products');
   })
   .catch((err)=>{
